@@ -1,0 +1,21 @@
+
+-- posts com categoria principal com yoast
+SELECT pm.meta_value as category, wpp.post_title, wpp.guid, wpp.post_date,
+       REPLACE( REPLACE( REPLACE( REPLACE( wpo.option_value, '%year%', DATE_FORMAT(wpp.post_date,'%Y') ), '%monthnum%', DATE_FORMAT(wpp.post_date, '%m') ), '%day%', DATE_FORMAT(wpp.post_date, '%d') ), '%postname%', wpp.post_name ) AS permalink
+  		, wpp.post_content	
+   FROM wp_posts wpp
+  JOIN wp_options wpo
+    ON wpo.option_name = 'permalink_structure'
+  JOIN wp_postmeta pm 
+  	ON wpp.ID = pm.post_id
+ WHERE wpp.post_type = 'post'
+   AND wpp.post_status = 'publish'
+   AND pm.meta_key like '%cat%'
+ ORDER BY wpp.post_date DESC;
+ 
+-- categorias dos posts 
+SELECT p.id, wt.* FROM wp_posts p
+ INNER JOIN wp_term_relationships r ON r.object_id=p.ID
+ INNER JOIN wp_term_taxonomy t ON t.term_taxonomy_id = r.term_taxonomy_id
+ INNER JOIN wp_terms wt on wt.term_id = t.term_id
+WHERE t.taxonomy='category'
